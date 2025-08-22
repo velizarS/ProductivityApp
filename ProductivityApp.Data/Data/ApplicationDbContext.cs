@@ -19,32 +19,33 @@ namespace ProductivityApp.Data.Data
         {
             base.OnModelCreating(modelBuilder);
 
-            // Configure Habit entity
+            modelBuilder.Entity<Habit>().HasQueryFilter(h => !h.IsDeleted);
+            modelBuilder.Entity<HabitCompletion>().HasQueryFilter(c => !c.IsDeleted);
+            modelBuilder.Entity<JournalEntry>().HasQueryFilter(j => !j.IsDeleted);
+
             modelBuilder.Entity<Habit>()
                 .HasMany(h => h.Completions)
                 .WithOne(c => c.Habit)
                 .HasForeignKey(c => c.HabitId)
-                .OnDelete(DeleteBehavior.Cascade);
+                .OnDelete(DeleteBehavior.Restrict);
 
             modelBuilder.Entity<Habit>()
                 .HasOne(h => h.User)
                 .WithMany(u => u.Habits)
                 .HasForeignKey(h => h.UserId)
-                .OnDelete(DeleteBehavior.Cascade);
+                .OnDelete(DeleteBehavior.Restrict);
 
-            // Configure JournalEntry entity
             modelBuilder.Entity<JournalEntry>()
                 .HasOne(j => j.User)
                 .WithMany(u => u.JournalEntries)
                 .HasForeignKey(j => j.UserId)
-                .OnDelete(DeleteBehavior.Cascade);
+                .OnDelete(DeleteBehavior.Restrict);
 
-            // Configure HabitCompletion entity
             modelBuilder.Entity<HabitCompletion>()
                 .HasOne(c => c.Habit)
                 .WithMany(h => h.Completions)
                 .HasForeignKey(c => c.HabitId)
-                .OnDelete(DeleteBehavior.Cascade);
+                .OnDelete(DeleteBehavior.Restrict);
         }
     }
 }
