@@ -6,4 +6,15 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
+  <ItemGroup>
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Abstractions" Version="8.0.19" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="8.0.2" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\ProductivityApp.Common\ProductivityApp.Common.csproj" />
+    <ProjectReference Include="..\ProductivityApp.Data\ProductivityApp.Data.csproj" />
+    <ProjectReference Include="..\ProductivityApp.Models\ProductivityApp.Models.csproj" />
+  </ItemGroup>
+
 </Project>

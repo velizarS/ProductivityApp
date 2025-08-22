@@ -15,4 +15,9 @@
     <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="8.0.19" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\ProductivityApp.Common\ProductivityApp.Common.csproj" />
+    <ProjectReference Include="..\ProductivityApp.Services\ProductivityApp.Services.csproj" />
+  </ItemGroup>
+
 </Project>

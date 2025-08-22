@@ -7,27 +7,25 @@ namespace ProductivityApp.Models.Models
     public class HabitCompletion
     {
         [Key]
-        [Display(Name = "Идентификатор на изпълнението")]
-        [Comment("Уникален идентификатор на записа за изпълнение на навика")]
         public int Id { get; set; }
 
         [Required]
-        [Display(Name = "Навик")]
-        [Comment("ID на навика, за който се отбелязва изпълнението")]
+        [Display(Name = "Habit")]
+        [Comment("The habit being completed")]
         public int HabitId { get; set; }
-
-        [Display(Name = "Навик")]
-        [Comment("Навикът, за който се отбелязва изпълнението")]
         public Habit Habit { get; set; }
 
         [Required]
-        [Display(Name = "Дата на изпълнението")]
-        [Comment("Датата, на която е отбелязано изпълнението на навика")]
+        [Display(Name = "Completion Date")]
+        [Comment("The date when the habit was completed")]
         public DateTime Date { get; set; }
 
         [Required]
-        [Display(Name = "Изпълнено")]
-        [Comment("Отбелязва дали навикът е изпълнен на тази дата")]
+        [Display(Name = "Completed?")]
+        [Comment("Indicates if the habit was completed on this date")]
         public bool IsCompleted { get; set; }
+
+        public bool IsDeleted { get; set; } = false;
+        public DateTime? DeletedAt { get; set; }
     }
 }

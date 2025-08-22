@@ -6,6 +6,7 @@ using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using ProductivityApp.Data;
+using ProductivityApp.Data.Data;
 
 namespace ProductivityApp.Data.Migrations
 {
