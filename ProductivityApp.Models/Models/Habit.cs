@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using ProductivityApp.Common.Enums;
+using System;
 using System.ComponentModel.DataAnnotations;
 
 namespace ProductivityApp.Models.Models
@@ -7,7 +8,7 @@ namespace ProductivityApp.Models.Models
     public class Habit
     {
         [Key]
-        public int Id { get; set; }
+        public Guid Id { get; set; }
 
         [Required]
         [MaxLength(100)]

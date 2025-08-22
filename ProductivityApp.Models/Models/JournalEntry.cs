@@ -8,7 +8,7 @@ namespace ProductivityApp.Models.Models
     public class JournalEntry
     {
         [Key]
-        public int Id { get; set; }
+        public Guid Id { get; set; }
 
         [Required]
         [Display(Name = "Entry Date")]
@@ -33,5 +33,8 @@ namespace ProductivityApp.Models.Models
 
         public bool IsDeleted { get; set; } = false;
         public DateTime? DeletedAt { get; set; }
+
+        public ICollection<TaskM> Tasks { get; set; } = new List<TaskM>();
+
     }
 }

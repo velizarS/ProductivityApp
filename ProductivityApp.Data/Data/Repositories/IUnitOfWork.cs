@@ -1,9 +1,4 @@
 ﻿using ProductivityApp.Models.Models;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace ProductivityApp.Data.Data.Repositories
 {
@@ -12,6 +7,7 @@ namespace ProductivityApp.Data.Data.Repositories
         IRepository<Habit> Habits { get; }
         IRepository<HabitCompletion> HabitCompletions { get; }
         IRepository<JournalEntry> JournalEntries { get; }
+        IRepository<TaskM> TaskMs { get; }
 
         Task<int> CompleteAsync();
     }

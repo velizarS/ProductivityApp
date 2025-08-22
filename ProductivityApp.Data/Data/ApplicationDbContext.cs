@@ -14,6 +14,8 @@ namespace ProductivityApp.Data.Data
         public DbSet<Habit> Habits { get; set; }
         public DbSet<HabitCompletion> HabitCompletions { get; set; }
         public DbSet<JournalEntry> JournalEntries { get; set; }
+        public DbSet<TaskM> Tasks { get; set; }
+
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -22,6 +24,7 @@ namespace ProductivityApp.Data.Data
             modelBuilder.Entity<Habit>().HasQueryFilter(h => !h.IsDeleted);
             modelBuilder.Entity<HabitCompletion>().HasQueryFilter(c => !c.IsDeleted);
             modelBuilder.Entity<JournalEntry>().HasQueryFilter(j => !j.IsDeleted);
+            modelBuilder.Entity<TaskM>().HasQueryFilter(t => !t.IsDeleted); 
 
             modelBuilder.Entity<Habit>()
                 .HasMany(h => h.Completions)
@@ -46,6 +49,18 @@ namespace ProductivityApp.Data.Data
                 .WithMany(h => h.Completions)
                 .HasForeignKey(c => c.HabitId)
                 .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<TaskM>()
+                .HasOne(t => t.User)
+                .WithMany(u => u.Tasks) 
+                .HasForeignKey(t => t.UserId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<TaskM>()
+                .HasOne(t => t.JournalEntry)
+                .WithMany(j => j.Tasks) 
+                .HasForeignKey(t => t.JournalEntryId)
+                .OnDelete(DeleteBehavior.SetNull);
         }
     }
 }

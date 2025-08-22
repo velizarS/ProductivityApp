@@ -7,12 +7,12 @@ namespace ProductivityApp.Models.Models
     public class HabitCompletion
     {
         [Key]
-        public int Id { get; set; }
+        public Guid Id { get; set; }
 
         [Required]
         [Display(Name = "Habit")]
         [Comment("The habit being completed")]
-        public int HabitId { get; set; }
+        public Guid HabitId { get; set; }
         public Habit Habit { get; set; }
 
         [Required]
