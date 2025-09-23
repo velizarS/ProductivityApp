@@ -5,17 +5,15 @@ namespace ProductivityApp.Services.Heplers
 {
     public class AesGcmEncryptionHelper : IAesGcmEncryptionHelper
     {
-        private const int KeySize = 32; // 256 bit
-        private const int NonceSize = 12; // AES-GCM standard nonce size
-        private const int TagSize = 16; // authentication tag size
+        private const int KeySize = 32; 
+        private const int NonceSize = 12; 
+        private const int TagSize = 16; 
 
-        // Генериране на ключ на база userId + salt/pepper (може да е static string)
         private byte[] GenerateKey(string userId)
         {
             using var sha = SHA256.Create();
-            // може да добавиш допълнителен "pepper" за сигурност
             var keyBytes = Encoding.UTF8.GetBytes(userId + "YourStaticPepperHere");
-            return sha.ComputeHash(keyBytes); // връща 32 байта за AES-256
+            return sha.ComputeHash(keyBytes); 
         }
 
         public string Encrypt(string plainText, string userId)
@@ -29,7 +27,6 @@ namespace ProductivityApp.Services.Heplers
             using var aes = new AesGcm(key);
             aes.Encrypt(nonce, plaintextBytes, cipherBytes, tag);
 
-            // комбинираме nonce + tag + ciphertext и връщаме Base64
             var result = new byte[NonceSize + TagSize + cipherBytes.Length];
             Buffer.BlockCopy(nonce, 0, result, 0, NonceSize);
             Buffer.BlockCopy(tag, 0, result, NonceSize, TagSize);

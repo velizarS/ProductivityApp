@@ -16,6 +16,12 @@ namespace ProductivityApp.Models.Models
         [Comment("Name of the habit")]
         public string Name { get; set; }
 
+        [MaxLength(500)]
+        [Display(Name = "Description")]
+        [Comment("Optional description for the habit")]
+        public string? Description { get; set; }
+
+
         [Required]
         [Display(Name = "Frequency")]
         [Comment("How often the habit should be completed")]

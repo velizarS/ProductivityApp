@@ -1,0 +1,28 @@
+﻿@model ProductivityApp.Web.ViewModels.Habits.HabitListViewModel
+
+<div class="card mb-3 shadow-sm">
+    <div class="card-body">
+        <h5 class="card-title">@Model.Name</h5>
+        @* Ако имаш описание, можеш да го добавиш тук *@
+        @* <p class="card-text">@Model.Description</p> *@
+
+        <p class="mb-1"><strong>Frequency:</strong> @Model.Frequency</p>
+        <p class="mb-1"><strong>Total Completions:</strong> @Model.TotalCompletions</p>
+
+        @if (Model.IsDeleted)
+        {
+            <span class="badge bg-danger">Deleted</span>
+        }
+
+        <div class="mt-2">
+            <a asp-action="Details" asp-route-id="@Model.Id" class="btn btn-primary btn-sm">Details</a>
+            <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-warning btn-sm">Edit</a>
+
+            <form asp-action="MarkComplete" asp-route-id="@Model.Id" method="post" class="d-inline">
+                <button type="submit" class="btn btn-success btn-sm">Mark Complete</button>
+            </form>
+
+            <a asp-action="Delete" asp-route-id="@Model.Id" class="btn btn-danger btn-sm">Delete</a>
+        </div>
+    </div>
+</div>

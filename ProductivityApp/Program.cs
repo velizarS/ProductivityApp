@@ -6,21 +6,19 @@ using ProductivityApp.Models.Models;
 using ProductivityApp.Services.Heplers;
 using ProductivityApp.Services.Implementations;
 using ProductivityApp.Services.Interfaces;
+using AutoMapper;
+using Microsoft.Extensions.DependencyInjection;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection")
     ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
 
-// DbContext
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseSqlServer(connectionString));
 
-// Developer exception page for EF
 builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 
-// Identity with custom ApplicationUser
 builder.Services.AddDefaultIdentity<ApplicationUser>(options =>
 {
     options.SignIn.RequireConfirmedAccount = true;
@@ -29,7 +27,6 @@ builder.Services.AddDefaultIdentity<ApplicationUser>(options =>
 
 builder.Services.AddControllersWithViews();
 
-// Dependency Injection
 builder.Services.AddSingleton<IAesGcmEncryptionHelper, AesGcmEncryptionHelper>();
 builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 builder.Services.AddScoped<IJournalService, JournalService>();
@@ -37,9 +34,12 @@ builder.Services.AddScoped<IHabitsService, HabitsService>();
 builder.Services.AddScoped<IHistoryService, HistoryService>();
 builder.Services.AddScoped<IDashboardService, DashboardService>();
 
+builder.Services.AddAutoMapper(cfg =>
+{
+    cfg.AddProfile<ProductivityApp.Web.Mappings.HabitProfile>();
+});
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
     app.UseMigrationsEndPoint();
@@ -55,11 +55,9 @@ app.UseStaticFiles();
 
 app.UseRouting();
 
-// Authentication & Authorization
 app.UseAuthentication();
 app.UseAuthorization();
 
-// Routing
 app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Home}/{action=Index}/{id?}");
