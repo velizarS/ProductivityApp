@@ -10,6 +10,7 @@ public class UnitOfWork : IUnitOfWork
     public IRepository<HabitCompletion> HabitCompletions { get; private set; }
     public IRepository<JournalEntry> JournalEntries { get; private set; }
     public IRepository<TaskM> TaskMs { get; private set; }
+    public IRepository<DailyEntry> DailyEntries { get; private set; }
 
     public UnitOfWork(ApplicationDbContext context)
     {
@@ -18,6 +19,7 @@ public class UnitOfWork : IUnitOfWork
         HabitCompletions = new EfRepository<HabitCompletion>(_context);
         JournalEntries = new EfRepository<JournalEntry>(_context);
         TaskMs = new EfRepository<TaskM>(_context);
+        DailyEntries = new EfRepository<DailyEntry>(_context);
     }
 
     public async Task<int> CompleteAsync() => await _context.SaveChangesAsync();

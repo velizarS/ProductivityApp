@@ -12,7 +12,7 @@ using ProductivityApp.Data.Data;
 namespace ProductivityApp.Data.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20250825104102_InitialMigration")]
+    [Migration("20250923100834_InitialMigration")]
     partial class InitialMigration
     {
         /// <inheritdoc />
@@ -227,6 +227,32 @@ namespace ProductivityApp.Data.Migrations
                     b.ToTable("AspNetUsers", (string)null);
                 });
 
+            modelBuilder.Entity("ProductivityApp.Models.Models.DailyEntry", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("Date")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime?>("DeletedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("UserId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("DailyEntries");
+                });
+
             modelBuilder.Entity("ProductivityApp.Models.Models.Habit", b =>
                 {
                     b.Property<Guid>("Id")
@@ -272,25 +298,27 @@ namespace ProductivityApp.Data.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<Guid>("DailyEntryId")
+                        .HasColumnType("uniqueidentifier");
+
                     b.Property<DateTime>("Date")
-                        .HasColumnType("datetime2")
-                        .HasComment("The date when the habit was completed");
+                        .HasColumnType("datetime2");
 
                     b.Property<DateTime?>("DeletedAt")
                         .HasColumnType("datetime2");
 
                     b.Property<Guid>("HabitId")
-                        .HasColumnType("uniqueidentifier")
-                        .HasComment("The habit being completed");
+                        .HasColumnType("uniqueidentifier");
 
                     b.Property<bool>("IsCompleted")
-                        .HasColumnType("bit")
-                        .HasComment("Indicates if the habit was completed on this date");
+                        .HasColumnType("bit");
 
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("bit");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("DailyEntryId");
 
                     b.HasIndex("HabitId");
 
@@ -303,9 +331,11 @@ namespace ProductivityApp.Data.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<Guid>("DailyEntryId")
+                        .HasColumnType("uniqueidentifier");
+
                     b.Property<DateTime>("Date")
-                        .HasColumnType("datetime2")
-                        .HasComment("The date of the journal entry");
+                        .HasColumnType("datetime2");
 
                     b.Property<DateTime?>("DeletedAt")
                         .HasColumnType("datetime2");
@@ -314,21 +344,19 @@ namespace ProductivityApp.Data.Migrations
                         .HasColumnType("bit");
 
                     b.Property<int>("Mood")
-                        .HasColumnType("int")
-                        .HasComment("The mood of the user for this entry");
+                        .HasColumnType("int");
 
                     b.Property<string>("Note")
-                        .IsRequired()
                         .HasMaxLength(1000)
-                        .HasColumnType("nvarchar(1000)")
-                        .HasComment("Optional note for the journal entry");
+                        .HasColumnType("nvarchar(1000)");
 
                     b.Property<string>("UserId")
                         .IsRequired()
-                        .HasColumnType("nvarchar(450)")
-                        .HasComment("User who owns this journal entry");
+                        .HasColumnType("nvarchar(450)");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("DailyEntryId");
 
                     b.HasIndex("UserId");
 
@@ -341,43 +369,43 @@ namespace ProductivityApp.Data.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<DateTime?>("CompletedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("CompletionNote")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<Guid>("DailyEntryId")
+                        .HasColumnType("uniqueidentifier");
+
                     b.Property<DateTime?>("DeletedAt")
                         .HasColumnType("datetime2");
 
                     b.Property<string>("Description")
-                        .HasMaxLength(500)
-                        .HasColumnType("nvarchar(500)")
-                        .HasComment("Допълнително описание на задачата, ако е необходимо");
+                        .HasMaxLength(1000)
+                        .HasColumnType("nvarchar(1000)");
 
                     b.Property<DateTime>("DueDate")
-                        .HasColumnType("datetime2")
-                        .HasComment("Дата и час, до която задачата трябва да бъде изпълнена");
+                        .HasColumnType("datetime2");
 
                     b.Property<bool>("IsCompleted")
-                        .HasColumnType("bit")
-                        .HasComment("Статус на задачата: изпълнена или не");
+                        .HasColumnType("bit");
 
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("bit");
 
-                    b.Property<Guid?>("JournalEntryId")
-                        .HasColumnType("uniqueidentifier")
-                        .HasComment("Опционална връзка към дневников запис");
-
                     b.Property<string>("Title")
                         .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)")
-                        .HasComment("Основното заглавие на задачата");
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
 
                     b.Property<string>("UserId")
                         .IsRequired()
-                        .HasColumnType("nvarchar(450)")
-                        .HasComment("Идентификатор на потребителя, на когото принадлежи задачата");
+                        .HasColumnType("nvarchar(450)");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("JournalEntryId");
+                    b.HasIndex("DailyEntryId");
 
                     b.HasIndex("UserId");
 
@@ -435,6 +463,17 @@ namespace ProductivityApp.Data.Migrations
                         .IsRequired();
                 });
 
+            modelBuilder.Entity("ProductivityApp.Models.Models.DailyEntry", b =>
+                {
+                    b.HasOne("ProductivityApp.Models.Models.ApplicationUser", "User")
+                        .WithMany("DailyEntries")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("User");
+                });
+
             modelBuilder.Entity("ProductivityApp.Models.Models.Habit", b =>
                 {
                     b.HasOne("ProductivityApp.Models.Models.ApplicationUser", "User")
@@ -448,32 +487,49 @@ namespace ProductivityApp.Data.Migrations
 
             modelBuilder.Entity("ProductivityApp.Models.Models.HabitCompletion", b =>
                 {
+                    b.HasOne("ProductivityApp.Models.Models.DailyEntry", "DailyEntry")
+                        .WithMany("HabitCompletions")
+                        .HasForeignKey("DailyEntryId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
                     b.HasOne("ProductivityApp.Models.Models.Habit", "Habit")
                         .WithMany("Completions")
                         .HasForeignKey("HabitId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
+                    b.Navigation("DailyEntry");
+
                     b.Navigation("Habit");
                 });
 
             modelBuilder.Entity("ProductivityApp.Models.Models.JournalEntry", b =>
                 {
+                    b.HasOne("ProductivityApp.Models.Models.DailyEntry", "DailyEntry")
+                        .WithMany("JournalEntries")
+                        .HasForeignKey("DailyEntryId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
                     b.HasOne("ProductivityApp.Models.Models.ApplicationUser", "User")
                         .WithMany("JournalEntries")
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
+                    b.Navigation("DailyEntry");
+
                     b.Navigation("User");
                 });
 
             modelBuilder.Entity("ProductivityApp.Models.Models.TaskM", b =>
                 {
-                    b.HasOne("ProductivityApp.Models.Models.JournalEntry", "JournalEntry")
+                    b.HasOne("ProductivityApp.Models.Models.DailyEntry", "DailyEntry")
                         .WithMany("Tasks")
-                        .HasForeignKey("JournalEntryId")
-                        .OnDelete(DeleteBehavior.SetNull);
+                        .HasForeignKey("DailyEntryId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.HasOne("ProductivityApp.Models.Models.ApplicationUser", "User")
                         .WithMany("Tasks")
@@ -481,14 +537,25 @@ namespace ProductivityApp.Data.Migrations
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.Navigation("JournalEntry");
+                    b.Navigation("DailyEntry");
 
                     b.Navigation("User");
                 });
 
             modelBuilder.Entity("ProductivityApp.Models.Models.ApplicationUser", b =>
                 {
+                    b.Navigation("DailyEntries");
+
                     b.Navigation("Habits");
+
+                    b.Navigation("JournalEntries");
+
+                    b.Navigation("Tasks");
+                });
+
+            modelBuilder.Entity("ProductivityApp.Models.Models.DailyEntry", b =>
+                {
+                    b.Navigation("HabitCompletions");
 
                     b.Navigation("JournalEntries");
 
@@ -498,11 +565,6 @@ namespace ProductivityApp.Data.Migrations
             modelBuilder.Entity("ProductivityApp.Models.Models.Habit", b =>
                 {
                     b.Navigation("Completions");
-                });
-
-            modelBuilder.Entity("ProductivityApp.Models.Models.JournalEntry", b =>
-                {
-                    b.Navigation("Tasks");
                 });
 #pragma warning restore 612, 618
         }

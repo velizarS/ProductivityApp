@@ -157,6 +157,27 @@ namespace ProductivityApp.Data.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "DailyEntries",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    UserId = table.Column<string>(type: "nvarchar(450)", nullable: false),
+                    Date = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    IsDeleted = table.Column<bool>(type: "bit", nullable: false),
+                    DeletedAt = table.Column<DateTime>(type: "datetime2", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_DailyEntries", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_DailyEntries_AspNetUsers_UserId",
+                        column: x => x.UserId,
+                        principalTable: "AspNetUsers",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "Habits",
                 columns: table => new
                 {
@@ -184,10 +205,11 @@ namespace ProductivityApp.Data.Migrations
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    Date = table.Column<DateTime>(type: "datetime2", nullable: false, comment: "The date of the journal entry"),
-                    Mood = table.Column<int>(type: "int", nullable: false, comment: "The mood of the user for this entry"),
-                    Note = table.Column<string>(type: "nvarchar(1000)", maxLength: 1000, nullable: false, comment: "Optional note for the journal entry"),
-                    UserId = table.Column<string>(type: "nvarchar(450)", nullable: false, comment: "User who owns this journal entry"),
+                    DailyEntryId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    UserId = table.Column<string>(type: "nvarchar(450)", nullable: false),
+                    Mood = table.Column<int>(type: "int", nullable: false),
+                    Note = table.Column<string>(type: "nvarchar(1000)", maxLength: 1000, nullable: true),
+                    Date = table.Column<DateTime>(type: "datetime2", nullable: false),
                     IsDeleted = table.Column<bool>(type: "bit", nullable: false),
                     DeletedAt = table.Column<DateTime>(type: "datetime2", nullable: true)
                 },
@@ -200,28 +222,12 @@ namespace ProductivityApp.Data.Migrations
                         principalTable: "AspNetUsers",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Restrict);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "HabitCompletions",
-                columns: table => new
-                {
-                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    HabitId = table.Column<Guid>(type: "uniqueidentifier", nullable: false, comment: "The habit being completed"),
-                    Date = table.Column<DateTime>(type: "datetime2", nullable: false, comment: "The date when the habit was completed"),
-                    IsCompleted = table.Column<bool>(type: "bit", nullable: false, comment: "Indicates if the habit was completed on this date"),
-                    IsDeleted = table.Column<bool>(type: "bit", nullable: false),
-                    DeletedAt = table.Column<DateTime>(type: "datetime2", nullable: true)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_HabitCompletions", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_HabitCompletions_Habits_HabitId",
-                        column: x => x.HabitId,
-                        principalTable: "Habits",
+                        name: "FK_JournalEntries_DailyEntries_DailyEntryId",
+                        column: x => x.DailyEntryId,
+                        principalTable: "DailyEntries",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Restrict);
+                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
@@ -229,12 +235,14 @@ namespace ProductivityApp.Data.Migrations
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    Title = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false, comment: "Основното заглавие на задачата"),
-                    Description = table.Column<string>(type: "nvarchar(500)", maxLength: 500, nullable: true, comment: "Допълнително описание на задачата, ако е необходимо"),
-                    DueDate = table.Column<DateTime>(type: "datetime2", nullable: false, comment: "Дата и час, до която задачата трябва да бъде изпълнена"),
-                    IsCompleted = table.Column<bool>(type: "bit", nullable: false, comment: "Статус на задачата: изпълнена или не"),
-                    UserId = table.Column<string>(type: "nvarchar(450)", nullable: false, comment: "Идентификатор на потребителя, на когото принадлежи задачата"),
-                    JournalEntryId = table.Column<Guid>(type: "uniqueidentifier", nullable: true, comment: "Опционална връзка към дневников запис"),
+                    UserId = table.Column<string>(type: "nvarchar(450)", nullable: false),
+                    DailyEntryId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    Title = table.Column<string>(type: "nvarchar(200)", maxLength: 200, nullable: false),
+                    Description = table.Column<string>(type: "nvarchar(1000)", maxLength: 1000, nullable: true),
+                    DueDate = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    IsCompleted = table.Column<bool>(type: "bit", nullable: false),
+                    CompletedAt = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    CompletionNote = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     IsDeleted = table.Column<bool>(type: "bit", nullable: false),
                     DeletedAt = table.Column<DateTime>(type: "datetime2", nullable: true)
                 },
@@ -248,11 +256,40 @@ namespace ProductivityApp.Data.Migrations
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
-                        name: "FK_Tasks_JournalEntries_JournalEntryId",
-                        column: x => x.JournalEntryId,
-                        principalTable: "JournalEntries",
+                        name: "FK_Tasks_DailyEntries_DailyEntryId",
+                        column: x => x.DailyEntryId,
+                        principalTable: "DailyEntries",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.SetNull);
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "HabitCompletions",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    HabitId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    DailyEntryId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    Date = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    IsCompleted = table.Column<bool>(type: "bit", nullable: false),
+                    IsDeleted = table.Column<bool>(type: "bit", nullable: false),
+                    DeletedAt = table.Column<DateTime>(type: "datetime2", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_HabitCompletions", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_HabitCompletions_DailyEntries_DailyEntryId",
+                        column: x => x.DailyEntryId,
+                        principalTable: "DailyEntries",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_HabitCompletions_Habits_HabitId",
+                        column: x => x.HabitId,
+                        principalTable: "Habits",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
                 });
 
             migrationBuilder.CreateIndex(
@@ -295,6 +332,16 @@ namespace ProductivityApp.Data.Migrations
                 filter: "[NormalizedUserName] IS NOT NULL");
 
             migrationBuilder.CreateIndex(
+                name: "IX_DailyEntries_UserId",
+                table: "DailyEntries",
+                column: "UserId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_HabitCompletions_DailyEntryId",
+                table: "HabitCompletions",
+                column: "DailyEntryId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_HabitCompletions_HabitId",
                 table: "HabitCompletions",
                 column: "HabitId");
@@ -305,14 +352,19 @@ namespace ProductivityApp.Data.Migrations
                 column: "UserId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_JournalEntries_DailyEntryId",
+                table: "JournalEntries",
+                column: "DailyEntryId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_JournalEntries_UserId",
                 table: "JournalEntries",
                 column: "UserId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Tasks_JournalEntryId",
+                name: "IX_Tasks_DailyEntryId",
                 table: "Tasks",
-                column: "JournalEntryId");
+                column: "DailyEntryId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Tasks_UserId",
@@ -342,6 +394,9 @@ namespace ProductivityApp.Data.Migrations
                 name: "HabitCompletions");
 
             migrationBuilder.DropTable(
+                name: "JournalEntries");
+
+            migrationBuilder.DropTable(
                 name: "Tasks");
 
             migrationBuilder.DropTable(
@@ -351,7 +406,7 @@ namespace ProductivityApp.Data.Migrations
                 name: "Habits");
 
             migrationBuilder.DropTable(
-                name: "JournalEntries");
+                name: "DailyEntries");
 
             migrationBuilder.DropTable(
                 name: "AspNetUsers");

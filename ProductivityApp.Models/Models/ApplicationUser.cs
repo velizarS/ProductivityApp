@@ -11,5 +11,8 @@ namespace ProductivityApp.Models.Models
 
         public ICollection<TaskM> Tasks { get; set; } = new List<TaskM>();
 
+        public ICollection<DailyEntry> DailyEntries { get; set; } = new List<DailyEntry>();
+
+
     }
 }

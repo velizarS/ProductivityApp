@@ -21,4 +21,8 @@
     <ProjectReference Include="..\ProductivityApp.Models\ProductivityApp.Models.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Migrations\" />
+  </ItemGroup>
+
 </Project>
