@@ -3,17 +3,26 @@ using ProductivityApp.Models.Models;
 using ProductivityApp.Services.Heplers;
 using ProductivityApp.Services.Interfaces;
 using Microsoft.EntityFrameworkCore;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace ProductivityApp.Services.Implementations
 {
     public class JournalService : IJournalService
     {
         private readonly IUnitOfWork _unitOfWork;
+        private readonly IDailyEntryService _dailyEntryService;
         private readonly IAesGcmEncryptionHelper _encryptionHelper;
 
-        public JournalService(IUnitOfWork unitOfWork, IAesGcmEncryptionHelper encryptionHelper)
+        public JournalService(
+            IUnitOfWork unitOfWork,
+            IDailyEntryService dailyEntryService,
+            IAesGcmEncryptionHelper encryptionHelper)
         {
             _unitOfWork = unitOfWork;
+            _dailyEntryService = dailyEntryService;
             _encryptionHelper = encryptionHelper;
         }
 
@@ -21,7 +30,7 @@ namespace ProductivityApp.Services.Implementations
         {
             var query = _unitOfWork.JournalEntries.Query()
                         .Where(j => j.UserId == userId)
-                        .OrderByDescending(j => j.Date); 
+                        .OrderByDescending(j => j.Date);
 
             var pagedEntries = await query
                         .Skip((pageNumber - 1) * pageSize)
@@ -56,8 +65,11 @@ namespace ProductivityApp.Services.Implementations
                 entry.Note = _encryptionHelper.Encrypt(entry.Note, entry.UserId);
             }
 
-            await _unitOfWork.JournalEntries.AddAsync(entry);
-            await _unitOfWork.CompleteAsync();
+            await _dailyEntryService.AddJournalEntryAsync(
+                userId: entry.UserId,
+                mood: entry.Mood,
+                note: entry.Note
+            );
         }
 
         public async Task UpdateEntryAsync(JournalEntry entry)

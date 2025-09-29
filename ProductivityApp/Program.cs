@@ -8,6 +8,7 @@ using ProductivityApp.Services.Implementations;
 using ProductivityApp.Services.Interfaces;
 using AutoMapper;
 using Microsoft.Extensions.DependencyInjection;
+using ProductivityApp.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -33,6 +34,8 @@ builder.Services.AddScoped<IJournalService, JournalService>();
 builder.Services.AddScoped<IHabitsService, HabitsService>();
 builder.Services.AddScoped<IHistoryService, HistoryService>();
 builder.Services.AddScoped<IDashboardService, DashboardService>();
+builder.Services.AddScoped<IDailyEntryService, DailyEntryService>();
+
 
 builder.Services.AddAutoMapper(cfg =>
 {

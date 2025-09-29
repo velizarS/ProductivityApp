@@ -7,7 +7,7 @@ public interface IUnitOfWork : IDisposable
     IRepository<HabitCompletion> HabitCompletions { get; }
     IRepository<JournalEntry> JournalEntries { get; }
     IRepository<TaskM> TaskMs { get; }
-    IRepository<DailyEntry> DailyEntries { get; }  // <- добави това
+    IRepository<DailyEntry> DailyEntries { get; }  
 
     Task<int> CompleteAsync();
 }

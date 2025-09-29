@@ -1,7 +1,11 @@
-﻿using ProductivityApp.Data.Data.Repositories;
+﻿using Microsoft.EntityFrameworkCore;
+using ProductivityApp.Data.Data.Repositories;
 using ProductivityApp.Models.Models;
-using Microsoft.EntityFrameworkCore;
 using ProductivityApp.Services.Interfaces;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace ProductivityApp.Services.Implementations
 {
@@ -14,21 +18,27 @@ namespace ProductivityApp.Services.Implementations
             _unitOfWork = unitOfWork;
         }
 
-        public async Task<IEnumerable<Habit>> GetUserHabitsAsync(string userId)
+        public async Task<IEnumerable<DailyEntry>> GetUserDailyEntriesAsync(string userId)
         {
-            return await _unitOfWork.Habits.Query()
-                .Where(h => h.UserId == userId)
+            return await _unitOfWork.DailyEntries.Query()
+                .Where(d => d.UserId == userId)
+                .Include(d => d.HabitCompletions)
+                    .ThenInclude(hc => hc.Habit)
+                .Include(d => d.Tasks)
+                .Include(d => d.JournalEntries)
+                .OrderByDescending(d => d.Date)
                 .ToListAsync();
         }
 
-        public async Task<IEnumerable<HabitCompletion>> GetUserHabitCompletionsAsync(string userId)
+        public async Task<DailyEntry?> GetTodayDailyEntryAsync(string userId)
         {
-            var habits = await GetUserHabitsAsync(userId);
-            var habitIds = habits.Select(h => h.Id).ToList();
-
-            return await _unitOfWork.HabitCompletions.Query()
-                .Where(c => habitIds.Contains(c.HabitId))
-                .ToListAsync();
+            var today = DateTime.Today;
+            return await _unitOfWork.DailyEntries.Query()
+                .Include(d => d.HabitCompletions)
+                    .ThenInclude(hc => hc.Habit)
+                .Include(d => d.Tasks)
+                .Include(d => d.JournalEntries)
+                .FirstOrDefaultAsync(d => d.UserId == userId && d.Date.Date == today);
         }
     }
 }

@@ -2,23 +2,29 @@
 using ProductivityApp.Data.Data.Repositories;
 using ProductivityApp.Models.Models;
 using ProductivityApp.Services.Interfaces;
+using System;
 using System.Linq;
+using System.Threading.Tasks;
+using System.Collections.Generic;
 
 namespace ProductivityApp.Services.Implementations
 {
     public class HabitsService : IHabitsService
     {
         private readonly IUnitOfWork _unitOfWork;
+        private readonly IDailyEntryService _dailyEntryService;
 
-        public HabitsService(IUnitOfWork unitOfWork)
+        public HabitsService(IUnitOfWork unitOfWork, IDailyEntryService dailyEntryService)
         {
             _unitOfWork = unitOfWork;
+            _dailyEntryService = dailyEntryService;
         }
 
         public async Task<IEnumerable<Habit>> GetAllHabitsAsync(string userId, int pageNumber = 1, int pageSize = 10)
         {
             var query = _unitOfWork.Habits.Query()
-                        .Where(h => h.UserId == userId);
+                        .Where(h => h.UserId == userId)
+                        .Include(h => h.Completions);
 
             var pagedHabits = await query
                 .Skip((pageNumber - 1) * pageSize)
@@ -28,10 +34,11 @@ namespace ProductivityApp.Services.Implementations
             return pagedHabits;
         }
 
-
         public async Task<Habit?> GetHabitByIdAsync(Guid id)
         {
-            return await _unitOfWork.Habits.GetByIdAsync(id);
+            return await _unitOfWork.Habits.Query()
+                .Include(h => h.Completions)
+                .FirstOrDefaultAsync(h => h.Id == id);
         }
 
         public async Task CreateHabitAsync(Habit habit)
@@ -58,9 +65,11 @@ namespace ProductivityApp.Services.Implementations
 
         public async Task MarkHabitCompletedAsync(Guid habitId, DateTime date)
         {
-            var completion = new HabitCompletion { HabitId = habitId, Date = date, IsCompleted = true };
-            await _unitOfWork.HabitCompletions.AddAsync(completion);
-            await _unitOfWork.CompleteAsync();
+            var habitCompletion = await _dailyEntryService.AddHabitCompletionAsync(
+                userId: (await _unitOfWork.Habits.GetByIdAsync(habitId))!.UserId,
+                habitId: habitId,
+                isCompleted: true
+            );
         }
     }
 }
