@@ -1,4 +1,4 @@
-﻿@model IEnumerable<ProductivityApp.Web.ViewModels.Habits.HabitListViewModel>
+﻿@model ProductivityApp.Web.ViewModels.Habits.HabitListPageViewModel
 
 @{
     ViewData["Title"] = "My Habits";
@@ -15,16 +15,18 @@
         <tr>
             <th>Title</th>
             <th>Description</th>
+            <th>Frequency</th>
             <th>Total Completions</th>
             <th></th>
         </tr>
     </thead>
     <tbody>
-        @foreach (var habit in Model)
+        @foreach (var habit in Model.Habits)
         {
             <tr>
                 <td>@habit.Name</td>
                 <td>@habit.Description</td>
+                <td>@habit.Frequency.ToString()</td>
                 <td>@habit.TotalCompletions</td>
                 <td>
                     <a asp-action="Details" asp-route-id="@habit.Id" class="btn btn-info btn-sm">View</a>
@@ -38,3 +40,14 @@
         }
     </tbody>
 </table>
+
+<nav>
+    <ul class="pagination">
+        @for (var i = 1; i <= Model.TotalPages; i++)
+        {
+            <li class="page-item @(i == Model.CurrentPage ? "active" : "")">
+                <a class="page-link" asp-action="Index" asp-route-page="@i">@i</a>
+            </li>
+        }
+    </ul>
+</nav>

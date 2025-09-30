@@ -4,15 +4,32 @@
     ViewData["Title"] = "Habit Details";
 }
 
-<h2>@Model.Name</h2>
+<div class="card shadow-sm mb-3">
+    <div class="card-body">
+        <h3 class="card-title">@Model.Name</h3>
 
-@if (!string.IsNullOrEmpty(Model.Description))
-{
-    <p><strong>Description:</strong> @Model.Description</p>
-}
+        @if (!string.IsNullOrEmpty(Model.Description))
+        {
+            <p class="card-text"><strong>Description:</strong> @Model.Description</p>
+        }
 
-<p><strong>Frequency:</strong> @Model.Frequency</p>
-<p><strong>Total Completions:</strong> @Model.TotalCompletions</p>
+        <p class="card-text"><strong>Frequency:</strong> @Model.Frequency.ToString()</p>
+        <p class="card-text"><strong>Total Completions:</strong> @Model.TotalCompletions</p>
 
-<a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-warning">Edit</a>
-<a asp-action="Index" class="btn btn-secondary">Back</a>
+        @if (Model.Completions != null && Model.Completions.Any())
+        {
+            <p><strong>Completed on:</strong></p>
+            <ul>
+                @foreach (var date in Model.Completions.OrderByDescending(d => d))
+                {
+                    <li>@date.ToString("yyyy-MM-dd")</li>
+                }
+            </ul>
+        }
+    </div>
+
+    <div class="card-footer">
+        <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-warning me-2">Edit</a>
+        <a asp-action="Index" class="btn btn-secondary">Back</a>
+    </div>
+</div>

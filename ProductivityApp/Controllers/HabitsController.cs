@@ -4,7 +4,10 @@ using Microsoft.AspNetCore.Mvc;
 using ProductivityApp.Models.Models;
 using ProductivityApp.Services.Interfaces;
 using ProductivityApp.Web.ViewModels.Habits;
+using System;
+using System.Collections.Generic;
 using System.Security.Claims;
+using System.Threading.Tasks;
 
 namespace ProductivityApp.Web.Controllers
 {
@@ -20,24 +23,31 @@ namespace ProductivityApp.Web.Controllers
             _mapper = mapper;
         }
 
-        private string GetUserId()
-        {
-            return User.FindFirstValue(ClaimTypes.NameIdentifier);
-        }
+        private string GetUserId() => User.FindFirstValue(ClaimTypes.NameIdentifier);
 
         public async Task<IActionResult> Index(int page = 1)
         {
             var userId = GetUserId();
+
             var habits = await _habitsService.GetAllHabitsAsync(userId, page, 10);
 
-            var model = _mapper.Map<List<HabitListViewModel>>(habits);
+            var listModel = _mapper.Map<List<HabitListViewModel>>(habits);
+
+            var totalCount = await _habitsService.GetHabitsCountAsync(userId);
+
+            var model = new HabitListPageViewModel
+            {
+                Habits = listModel,
+                CurrentPage = page,
+                PageSize = 10,
+                TotalCount = totalCount
+            };
+
             return View(model);
         }
 
-        public IActionResult Create()
-        {
-            return View();
-        }
+
+        public IActionResult Create() => View();
 
         [HttpPost]
         [ValidateAntiForgeryToken]
@@ -72,8 +82,8 @@ namespace ProductivityApp.Web.Controllers
             if (habit == null) return NotFound();
 
             _mapper.Map(model, habit);
-
             await _habitsService.UpdateHabitAsync(habit);
+
             return RedirectToAction(nameof(Index));
         }
 
@@ -86,7 +96,6 @@ namespace ProductivityApp.Web.Controllers
             return View(model);
         }
 
-
         public async Task<IActionResult> Delete(Guid id)
         {
             var habit = await _habitsService.GetHabitByIdAsync(id);
@@ -96,7 +105,7 @@ namespace ProductivityApp.Web.Controllers
             return View(model);
         }
 
-        [HttpPost, ActionName("Delete")]
+        [HttpPost, ActionName("DeleteConfirmed")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(Guid id)
         {
