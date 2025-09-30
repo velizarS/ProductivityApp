@@ -40,9 +40,7 @@ namespace ProductivityApp.Services.Implementations
             foreach (var entry in pagedEntries)
             {
                 if (!string.IsNullOrEmpty(entry.Note))
-                {
                     entry.Note = _encryptionHelper.Decrypt(entry.Note, entry.UserId);
-                }
             }
 
             return pagedEntries;
@@ -52,32 +50,28 @@ namespace ProductivityApp.Services.Implementations
         {
             var entry = await _unitOfWork.JournalEntries.GetByIdAsync(id);
             if (entry != null && !string.IsNullOrEmpty(entry.Note))
-            {
                 entry.Note = _encryptionHelper.Decrypt(entry.Note, entry.UserId);
-            }
             return entry;
         }
 
         public async Task CreateEntryAsync(JournalEntry entry)
         {
-            if (!string.IsNullOrEmpty(entry.Note))
-            {
-                entry.Note = _encryptionHelper.Encrypt(entry.Note, entry.UserId);
-            }
+            var dailyEntry = await _dailyEntryService.GetOrCreateDailyEntryAsync(entry.UserId);
 
-            await _dailyEntryService.AddJournalEntryAsync(
-                userId: entry.UserId,
-                mood: entry.Mood,
-                note: entry.Note
-            );
+            if (!string.IsNullOrEmpty(entry.Note))
+                entry.Note = _encryptionHelper.Encrypt(entry.Note, entry.UserId);
+
+            entry.Id = Guid.NewGuid();
+            entry.DailyEntryId = dailyEntry.Id;
+
+            await _unitOfWork.JournalEntries.AddAsync(entry);
+            await _unitOfWork.CompleteAsync();
         }
 
         public async Task UpdateEntryAsync(JournalEntry entry)
         {
             if (!string.IsNullOrEmpty(entry.Note))
-            {
                 entry.Note = _encryptionHelper.Encrypt(entry.Note, entry.UserId);
-            }
 
             _unitOfWork.JournalEntries.Update(entry);
             await _unitOfWork.CompleteAsync();

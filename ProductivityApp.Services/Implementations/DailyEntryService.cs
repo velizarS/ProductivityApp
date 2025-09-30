@@ -1,13 +1,13 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using ProductivityApp.Data.Data.Repositories;
 using ProductivityApp.Models.Models;
-using ProductivityApp.Common.Enums;
 using ProductivityApp.Services.Interfaces;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace ProductivityApp.Services
+namespace ProductivityApp.Services.Implementations
 {
     public class DailyEntryService : IDailyEntryService
     {
@@ -18,6 +18,7 @@ namespace ProductivityApp.Services
             _unitOfWork = unitOfWork;
         }
 
+        // Връща или създава дневен запис
         public async Task<DailyEntry> GetOrCreateDailyEntryAsync(string userId, DateTime? date = null)
         {
             var targetDate = date?.Date ?? DateTime.Today;
@@ -44,7 +45,8 @@ namespace ProductivityApp.Services
             return dailyEntry;
         }
 
-        public async Task<DailyEntry> GetDailyEntryByDateAsync(string userId, DateTime date)
+        // Read-only методи за дневни записи
+        public async Task<DailyEntry?> GetDailyEntryByDateAsync(string userId, DateTime date)
         {
             return await _unitOfWork.DailyEntries.Query()
                 .Include(d => d.HabitCompletions)
@@ -53,7 +55,7 @@ namespace ProductivityApp.Services
                 .FirstOrDefaultAsync(d => d.UserId == userId && d.Date.Date == date.Date);
         }
 
-        public async Task<DailyEntry> GetDailyEntryByIdAsync(string userId, Guid dailyEntryId)
+        public async Task<DailyEntry?> GetDailyEntryByIdAsync(string userId, Guid dailyEntryId)
         {
             return await _unitOfWork.DailyEntries.Query()
                 .Include(d => d.HabitCompletions)
@@ -62,66 +64,23 @@ namespace ProductivityApp.Services
                 .FirstOrDefaultAsync(d => d.UserId == userId && d.Id == dailyEntryId);
         }
 
-        public async Task<HabitCompletion> AddHabitCompletionAsync(string userId, Guid habitId, bool isCompleted = true)
+        // По желание: методи за преглед на съдържанието на деня
+        public async Task<IEnumerable<HabitCompletion>> GetHabitsForDayAsync(string userId, DateTime date)
         {
-            var dailyEntry = await GetOrCreateDailyEntryAsync(userId);
-
-            var habitCompletion = new HabitCompletion
-            {
-                Id = Guid.NewGuid(),
-                HabitId = habitId,
-                DailyEntryId = dailyEntry.Id,
-                Date = DateTime.Now,
-                IsCompleted = isCompleted
-            };
-
-            await _unitOfWork.HabitCompletions.AddAsync(habitCompletion);
-            await _unitOfWork.CompleteAsync();
-
-            return habitCompletion;
+            var dailyEntry = await GetDailyEntryByDateAsync(userId, date);
+            return dailyEntry?.HabitCompletions ?? Enumerable.Empty<HabitCompletion>();
         }
 
-        public async Task<JournalEntry> AddJournalEntryAsync(string userId, MoodType mood, string note)
+        public async Task<IEnumerable<TaskM>> GetTasksForDayAsync(string userId, DateTime date)
         {
-            var dailyEntry = await GetOrCreateDailyEntryAsync(userId);
-
-            var journalEntry = new JournalEntry
-            {
-                Id = Guid.NewGuid(),
-                DailyEntryId = dailyEntry.Id,
-                UserId = userId,
-                Mood = mood,
-                Note = note
-            };
-
-            await _unitOfWork.JournalEntries.AddAsync(journalEntry);
-            await _unitOfWork.CompleteAsync();
-
-            return journalEntry;
+            var dailyEntry = await GetDailyEntryByDateAsync(userId, date);
+            return dailyEntry?.Tasks ?? Enumerable.Empty<TaskM>();
         }
 
-        public async Task<TaskM> AddOrCompleteTaskAsync(string userId, Guid taskId, string? completionNote = null)
+        public async Task<IEnumerable<JournalEntry>> GetJournalEntriesForDayAsync(string userId, DateTime date)
         {
-            var dailyEntry = await GetOrCreateDailyEntryAsync(userId);
-
-            var task = await _unitOfWork.TaskMs.Query()
-                .FirstOrDefaultAsync(t => t.Id == taskId && t.UserId == userId);
-
-            if (task == null)
-                throw new Exception("Task not found.");
-
-            if (task.DailyEntryId != dailyEntry.Id)
-                task.DailyEntryId = dailyEntry.Id;
-
-            task.IsCompleted = true;
-            task.CompletedAt = DateTime.Now;
-            if (!string.IsNullOrEmpty(completionNote))
-                task.CompletionNote = completionNote;
-
-            _unitOfWork.TaskMs.Update(task);
-            await _unitOfWork.CompleteAsync();
-
-            return task;
+            var dailyEntry = await GetDailyEntryByDateAsync(userId, date);
+            return dailyEntry?.JournalEntries ?? Enumerable.Empty<JournalEntry>();
         }
     }
 }

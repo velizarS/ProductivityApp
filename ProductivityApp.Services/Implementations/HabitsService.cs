@@ -26,12 +26,10 @@ namespace ProductivityApp.Services.Implementations
                         .Where(h => h.UserId == userId)
                         .Include(h => h.Completions);
 
-            var pagedHabits = await query
+            return await query
                 .Skip((pageNumber - 1) * pageSize)
                 .Take(pageSize)
                 .ToListAsync();
-
-            return pagedHabits;
         }
 
         public async Task<Habit?> GetHabitByIdAsync(Guid id)
@@ -65,11 +63,25 @@ namespace ProductivityApp.Services.Implementations
 
         public async Task MarkHabitCompletedAsync(Guid habitId, DateTime date)
         {
-            var habitCompletion = await _dailyEntryService.AddHabitCompletionAsync(
-                userId: (await _unitOfWork.Habits.GetByIdAsync(habitId))!.UserId,
-                habitId: habitId,
-                isCompleted: true
-            );
+            var habit = await _unitOfWork.Habits.GetByIdAsync(habitId);
+            if (habit == null)
+                throw new Exception("Habit not found.");
+
+            // Вземаме или създаваме дневния запис за този потребител
+            var dailyEntry = await _dailyEntryService.GetOrCreateDailyEntryAsync(habit.UserId, date);
+
+            // Създаваме нов запис за изпълнение на навика
+            var habitCompletion = new HabitCompletion
+            {
+                Id = Guid.NewGuid(),
+                HabitId = habitId,
+                DailyEntryId = dailyEntry.Id,
+                Date = date,
+                IsCompleted = true
+            };
+
+            await _unitOfWork.HabitCompletions.AddAsync(habitCompletion);
+            await _unitOfWork.CompleteAsync();
         }
     }
 }

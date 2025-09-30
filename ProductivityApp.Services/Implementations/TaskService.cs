@@ -63,17 +63,18 @@ namespace ProductivityApp.Services.Implementations
 
         public async Task<TaskM> CompleteTaskAsync(string userId, Guid taskId, string? completionNote = null)
         {
-            var task = _unitOfWork.TaskMs.Query().FirstOrDefault(t => t.Id == taskId && t.UserId == userId);
+            var task = await _unitOfWork.TaskMs.Query()
+                        .FirstOrDefaultAsync(t => t.Id == taskId && t.UserId == userId);
+
             if (task == null)
                 throw new Exception("Task not found.");
 
             var dailyEntry = await _dailyEntryService.GetOrCreateDailyEntryAsync(userId);
-            task.DailyEntryId = dailyEntry.Id;
 
+            task.DailyEntryId = dailyEntry.Id;
             task.IsCompleted = true;
             task.CompletedAt = DateTime.Now;
-            if (!string.IsNullOrEmpty(completionNote))
-                task.CompletionNote = completionNote;
+            task.CompletionNote = completionNote;
 
             _unitOfWork.TaskMs.Update(task);
             await _unitOfWork.CompleteAsync();
