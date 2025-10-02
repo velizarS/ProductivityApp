@@ -29,9 +29,15 @@
                 <td>@habit.Frequency.ToString()</td>
                 <td>@habit.TotalCompletions</td>
                 <td>
-                    <a asp-action="Details" asp-route-id="@habit.Id" class="btn btn-info btn-sm">View</a>
+                    <button class="btn btn-info btn-sm"
+                            onclick="openModal('@Url.Action("DetailsPartial", "Habits", new { id = habit.Id })')">
+                        View
+                    </button>
                     <a asp-action="Edit" asp-route-id="@habit.Id" class="btn btn-warning btn-sm">Edit</a>
-                    <a asp-action="Delete" asp-route-id="@habit.Id" class="btn btn-danger btn-sm">Delete</a>
+                    <button class="btn btn-danger btn-sm"
+                            onclick="openModal('@Url.Action("DeletePartial", "Habits", new { id = habit.Id })')">
+                        Delete
+                    </button>
                     <form asp-action="MarkComplete" asp-route-id="@habit.Id" method="post" class="d-inline">
                         <button type="submit" class="btn btn-success btn-sm">Mark Complete</button>
                     </form>
@@ -51,3 +57,5 @@
         }
     </ul>
 </nav>
+
+<div id="modalContainer"></div>
