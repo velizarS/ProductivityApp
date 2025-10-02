@@ -1,8 +1,123 @@
-﻿@{
-    ViewData["Title"] = "Home Page";
+﻿@model ProductivityApp.Web.ViewModels.Home.HomeDashboardViewModel
+@{
+    ViewData["Title"] = "Dashboard";
 }
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
+<h2>Dashboard</h2>
+<hr />
+
+<div class="row">
+    <!-- Daily Entries -->
+    <div class="col-md-6 mb-4">
+        <div class="card shadow-sm">
+            <div class="card-header">
+                <h5>Recent Daily Entries</h5>
+            </div>
+            <div class="card-body">
+                @if (Model.DailyEntries.Any())
+                {
+                    <ul class="list-group">
+                        @foreach (var entry in Model.DailyEntries)
+                        {
+                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                @entry.Date.ToShortDateString()
+                                <a asp-controller="DailyEntry" asp-action="Detail" asp-route-id="@entry.Id" class="btn btn-sm btn-primary">View</a>
+                            </li>
+                        }
+                    </ul>
+                }
+                else
+                {
+                    <p>No daily entries yet.</p>
+                }
+            </div>
+        </div>
+    </div>
+
+    <!-- Tasks -->
+    <div class="col-md-6 mb-4">
+        <div class="card shadow-sm">
+            <div class="card-header">
+                <h5>Tasks Overview</h5>
+            </div>
+            <div class="card-body">
+                @if (Model.Tasks.Any())
+                {
+                    <ul class="list-group">
+                        @foreach (var task in Model.Tasks)
+                        {
+                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                @task.Title
+                                <span class="badge @(task.IsCompleted ? "bg-success" : "bg-warning")">
+                                    @(task.IsCompleted ? "Done" : "Pending")
+                                </span>
+                            </li>
+                        }
+                    </ul>
+                }
+                else
+                {
+                    <p>No tasks assigned yet.</p>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <!-- Habits -->
+    <div class="col-md-6 mb-4">
+        <div class="card shadow-sm">
+            <div class="card-header">
+                <h5>Habits Status</h5>
+            </div>
+            <div class="card-body">
+                @if (Model.Habits.Any())
+                {
+                    <ul class="list-group">
+                        @foreach (var habit in Model.Habits)
+                        {
+                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                @habit.Name
+                                <span class="badge @(habit.IsCompletedToday ? "bg-success" : "bg-secondary")">
+                                    @(habit.IsCompletedToday ? "Completed" : "Not done")
+                                </span>
+                            </li>
+                        }
+                    </ul>
+                }
+                else
+                {
+                    <p>No habits tracked yet.</p>
+                }
+            </div>
+        </div>
+    </div>
+
+    <!-- Journal Entries -->
+    <div class="col-md-6 mb-4">
+        <div class="card shadow-sm">
+            <div class="card-header">
+                <h5>Recent Journal Entries</h5>
+            </div>
+            <div class="card-body">
+                @if (Model.JournalEntries.Any())
+                {
+                    <ul class="list-group">
+                        @foreach (var journal in Model.JournalEntries)
+                        {
+                            <li class="list-group-item">
+                                <strong>@journal.Date.ToShortDateString()</strong> - @journal.Mood
+                                <p>@journal.Note</p>
+                            </li>
+                        }
+                    </ul>
+                }
+                else
+                {
+                    <p>No journal entries yet.</p>
+                }
+            </div>
+        </div>
+    </div>
 </div>

@@ -18,7 +18,18 @@ namespace ProductivityApp.Services.Implementations
             _unitOfWork = unitOfWork;
         }
 
-        // Връща или създава дневен запис
+        public async Task<IEnumerable<DailyEntry>> GetAllDailyEntriesAsync(string userId)
+        {
+            return await _unitOfWork.DailyEntries.Query()
+                .Include(d => d.HabitCompletions)
+                .Include(d => d.Tasks)
+                .Include(d => d.JournalEntries)
+                .Where(d => d.UserId == userId && !d.IsDeleted)
+                .OrderByDescending(d => d.Date)
+                .ToListAsync();
+        }
+
+
         public async Task<DailyEntry> GetOrCreateDailyEntryAsync(string userId, DateTime? date = null)
         {
             var targetDate = date?.Date ?? DateTime.Today;
@@ -45,7 +56,6 @@ namespace ProductivityApp.Services.Implementations
             return dailyEntry;
         }
 
-        // Read-only методи за дневни записи
         public async Task<DailyEntry?> GetDailyEntryByDateAsync(string userId, DateTime date)
         {
             return await _unitOfWork.DailyEntries.Query()
@@ -64,7 +74,6 @@ namespace ProductivityApp.Services.Implementations
                 .FirstOrDefaultAsync(d => d.UserId == userId && d.Id == dailyEntryId);
         }
 
-        // По желание: методи за преглед на съдържанието на деня
         public async Task<IEnumerable<HabitCompletion>> GetHabitsForDayAsync(string userId, DateTime date)
         {
             var dailyEntry = await GetDailyEntryByDateAsync(userId, date);

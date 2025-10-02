@@ -1,31 +1,39 @@
-using System.Diagnostics;
+using AutoMapper;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using ProductivityApp.Services.Interfaces;
+using ProductivityApp.Web.ViewModels.DailyEntries;
+using ProductivityApp.Web.ViewModels.Home;
+using System.Security.Claims;
+using System.Threading.Tasks;
 
-namespace ProductivityApp.Controllers
+namespace ProductivityApp.Web.Controllers
 {
+    [Authorize]
     public class HomeController : Controller
     {
-        private readonly ILogger<HomeController> _logger;
+        private readonly IDailyEntryService _dailyEntryService;
+        private readonly IMapper _mapper;
 
-        public HomeController(ILogger<HomeController> logger)
+        public HomeController(IDailyEntryService dailyEntryService, IMapper mapper)
         {
-            _logger = logger;
+            _dailyEntryService = dailyEntryService;
+            _mapper = mapper;
         }
 
-        public IActionResult Index()
-        {
-            return View();
-        }
+        private string GetUserId() => User.FindFirstValue(ClaimTypes.NameIdentifier);
 
-        public IActionResult Privacy()
+        public async Task<IActionResult> Index()
         {
-            return View();
-        }
+            var userId = GetUserId();
+            var dailyEntries = await _dailyEntryService.GetAllDailyEntriesAsync(userId);
 
-        //[ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
-        ////public IActionResult Error()
-        ////{
-        ////   // return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
-        ////}
+            var model = new HomeDashboardViewModel
+            {
+                DailyEntries = _mapper.Map<List<DailyEntryListViewModel>>(dailyEntries)
+            };
+
+            return View(model);
+        }
     }
 }

@@ -1,0 +1,30 @@
+﻿@model ProductivityApp.Web.ViewModels.Journal.JournalEntryCreateViewModel
+
+@{
+    ViewData["Title"] = "Add New Journal Entry";
+}
+
+<h2>@ViewData["Title"]</h2>
+
+<form asp-action="Create" method="post">
+    <div class="mb-3">
+        <label asp-for="Date" class="form-label"></label>
+        <input asp-for="Date" class="form-control" type="date" />
+        <span asp-validation-for="Date" class="text-danger"></span>
+    </div>
+
+    <div class="mb-3">
+        <label asp-for="Mood" class="form-label"></label>
+        <select asp-for="Mood" class="form-select" asp-items="Html.GetEnumSelectList<ProductivityApp.Common.Enums.MoodType>()"></select>
+        <span asp-validation-for="Mood" class="text-danger"></span>
+    </div>
+
+    <div class="mb-3">
+        <label asp-for="Note" class="form-label"></label>
+        <textarea asp-for="Note" class="form-control"></textarea>
+        <span asp-validation-for="Note" class="text-danger"></span>
+    </div>
+
+    <button type="submit" class="btn btn-primary">Save</button>
+    <a asp-action="Index" class="btn btn-secondary">Cancel</a>
+</form>

@@ -1,0 +1,21 @@
+﻿@model ProductivityApp.Web.ViewModels.Journal.JournalEntryDetailViewModel
+
+@{
+    ViewData["Title"] = "Journal Entry Details";
+}
+
+<h2>@ViewData["Title"]</h2>
+
+<div class="card mb-3">
+    <div class="card-body">
+        <p><strong>Date:</strong> @Model.Date.ToShortDateString()</p>
+        <p><strong>Mood:</strong> @Model.Mood</p>
+        @if (!string.IsNullOrEmpty(Model.Note))
+        {
+            <p><strong>Note:</strong> @Model.Note</p>
+        }
+    </div>
+</div>
+
+<a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-warning">Edit</a>
+<a asp-action="Index" class="btn btn-secondary">Back</a>

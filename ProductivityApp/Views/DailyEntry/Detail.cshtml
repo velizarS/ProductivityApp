@@ -1,0 +1,64 @@
+﻿@model ProductivityApp.Web.ViewModels.DailyEntry.DailyEntryDetailViewModel
+
+<h2>Daily Entry - @Model.Date.ToShortDateString()</h2>
+
+<hr />
+
+<h3>Habits</h3>
+<table class="table">
+    <thead>
+        <tr>
+            <th>Habit</th>
+            <th>Status</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var habit in Model.Habits)
+        {
+            <tr>
+                <td>@habit.Name</td>
+                <td>@habit.IsCompletedToday</td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+<h3>Tasks</h3>
+<table class="table">
+    <thead>
+        <tr>
+            <th>Task</th>
+            <th>Status</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var task in Model.Tasks)
+        {
+            <tr>
+                <td>@task.Title</td>
+                <td>@task.IsCompleted</td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+<h3>Journal Entries</h3>
+<table class="table">
+    <thead>
+        <tr>
+            <th>Mood</th>
+            <th>Note</th>
+            <th>Date</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var journal in Model.JournalEntries)
+        {
+            <tr>
+                <td>@journal.Mood</td>
+                <td>@journal.Note</td>
+                <td>@journal.Date.ToShortDateString()</td>
+            </tr>
+        }
+    </tbody>
+</table>

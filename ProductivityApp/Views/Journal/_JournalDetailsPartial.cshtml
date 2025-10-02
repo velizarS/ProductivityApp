@@ -1,0 +1,15 @@
+﻿@model ProductivityApp.Web.ViewModels.Journal.JournalEntryDetailViewModel
+
+<div class="card mb-3">
+    <div class="card-body">
+        <p><strong>Date:</strong> @Model.Date.ToShortDateString()</p>
+        <p><strong>Mood:</strong> @Model.Mood</p>
+        @if (!string.IsNullOrEmpty(Model.Note))
+        {
+            <p><strong>Note:</strong> @Model.Note</p>
+        }
+    </div>
+    <div class="card-footer">
+        <button type="button" class="btn btn-secondary" onclick="closeModal()">Close</button>
+    </div>
+</div>

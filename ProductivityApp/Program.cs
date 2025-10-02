@@ -43,7 +43,11 @@ builder.Services.AddAutoMapper(cfg =>
 {
     cfg.AddProfile<ProductivityApp.Web.Mappings.HabitProfile>();
     cfg.AddProfile<ProductivityApp.Web.Mappings.TaskProfile>();
+    cfg.AddProfile<ProductivityApp.Web.Mappings.JournalProfile>();
+    cfg.AddProfile<ProductivityApp.Web.Mappings.DailyEntryProfile>();
+
 });
+
 
 var app = builder.Build();
 

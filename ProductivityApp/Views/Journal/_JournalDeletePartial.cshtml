@@ -1,0 +1,23 @@
+﻿@model ProductivityApp.Web.ViewModels.Journal.JournalEntryDetailViewModel
+
+<div class="alert alert-danger">
+    <p>Are you sure you want to delete this entry?</p>
+</div>
+
+<div class="card mb-3">
+    <div class="card-body">
+        <p><strong>Date:</strong> @Model.Date.ToShortDateString()</p>
+        <p><strong>Mood:</strong> @Model.Mood</p>
+        @if (!string.IsNullOrEmpty(Model.Note))
+        {
+            <p><strong>Note:</strong> @Model.Note</p>
+        }
+    </div>
+    <div class="card-footer">
+        <form asp-action="Delete" method="post">
+            <input type="hidden" asp-for="Id" />
+            <button type="submit" class="btn btn-danger">Delete</button>
+            <button type="button" class="btn btn-secondary" onclick="closeModal()">Cancel</button>
+        </form>
+    </div>
+</div>

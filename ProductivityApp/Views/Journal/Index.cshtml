@@ -1,0 +1,79 @@
+﻿@model ProductivityApp.Web.ViewModels.Journal.JournalEntryListPageViewModel
+
+@{
+    ViewData["Title"] = "My Journal Entries";
+}
+
+<h2>@ViewData["Title"]</h2>
+
+<p>
+    <a asp-action="Create" class="btn btn-primary">+ Add New Entry</a>
+</p>
+
+<table class="table table-striped table-hover">
+    <thead>
+        <tr>
+            <th>Date</th>
+            <th>Mood</th>
+            <th>Note</th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var entry in Model.Entries)
+        {
+            <tr>
+                <td>@entry.Date.ToShortDateString()</td>
+                <td>@entry.Mood</td>
+                <td>@(entry.Note?.Length > 50 ? entry.Note.Substring(0, 50) + "..." : entry.Note)</td>
+                <td>
+                    <button class="btn btn-info btn-sm"
+                            onclick="openModal('@Url.Action("DetailsPartial", "Journal", new { id = entry.Id })')">
+                        View
+                    </button>
+                    <a asp-action="Edit" asp-route-id="@entry.Id" class="btn btn-warning btn-sm">Edit</a>
+                    <button class="btn btn-danger btn-sm"
+                            onclick="openModal('@Url.Action("DeletePartial", "Journal", new { id = entry.Id })')">
+                        Delete
+                    </button>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+<nav>
+    <ul class="pagination">
+        @for (var i = 1; i <= Model.TotalPages; i++)
+        {
+            <li class="page-item @(i == Model.CurrentPage ? "active" : "")">
+                <a class="page-link" asp-action="Index" asp-route-page="@i">@i</a>
+            </li>
+        }
+    </ul>
+</nav>
+
+<div id="modalContainer"></div>
+
+@section Scripts {
+    <script>
+        function openModal(url) {
+            $.get(url, function (data) {
+                $('#modalContainer').html(
+                    '<div class="modal-backdrop-custom"></div>' +
+                    '<div class="modal-content-custom">' + data + '</div>'
+                );
+                $('body').addClass('modal-open');
+            });
+        }
+
+        function closeModal() {
+            $('#modalContainer').html('');
+            $('body').removeClass('modal-open');
+        }
+
+        $(document).on('click', '.modal-backdrop-custom', function () {
+            closeModal();
+        });
+    </script>
+}
