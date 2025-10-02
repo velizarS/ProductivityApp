@@ -35,12 +35,16 @@ builder.Services.AddScoped<IHabitsService, HabitsService>();
 builder.Services.AddScoped<IHistoryService, HistoryService>();
 builder.Services.AddScoped<IDashboardService, DashboardService>();
 builder.Services.AddScoped<IDailyEntryService, DailyEntryService>();
+builder.Services.AddScoped<ITaskService, TaskService>();
+
 
 
 builder.Services.AddAutoMapper(cfg =>
 {
     cfg.AddProfile<ProductivityApp.Web.Mappings.HabitProfile>();
+    cfg.AddProfile<ProductivityApp.Web.Mappings.TaskProfile>();
 });
+
 var app = builder.Build();
 
 if (app.Environment.IsDevelopment())

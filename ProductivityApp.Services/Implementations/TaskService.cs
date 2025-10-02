@@ -61,6 +61,14 @@ namespace ProductivityApp.Services.Implementations
             return task;
         }
 
+        public async Task UpdateTaskAsync(TaskM task)
+        {
+            _unitOfWork.TaskMs.Update(task);
+            await _unitOfWork.CompleteAsync();
+        }
+
+
+
         public async Task<TaskM> CompleteTaskAsync(string userId, Guid taskId, string? completionNote = null)
         {
             var task = await _unitOfWork.TaskMs.Query()
@@ -81,6 +89,13 @@ namespace ProductivityApp.Services.Implementations
 
             return task;
         }
+
+        public async Task<int> GetTasksCountAsync(string userId)
+        {
+            return await _unitOfWork.TaskMs.Query()
+                .CountAsync(t => t.UserId == userId && !t.IsDeleted);
+        }
+
 
         public async Task DeleteTaskAsync(Guid taskId)
         {

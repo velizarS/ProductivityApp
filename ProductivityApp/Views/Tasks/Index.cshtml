@@ -1,0 +1,121 @@
+﻿@model ProductivityApp.Web.ViewModels.Tasks.TaskListPageViewModel
+
+@{
+    ViewData["Title"] = "My Tasks";
+}
+
+<h2>@ViewData["Title"]</h2>
+
+<p>
+    <a asp-action="Create" class="btn btn-primary">+ Add New Task</a>
+</p>
+
+<table class="table table-striped table-hover">
+    <thead>
+        <tr>
+            <th>Title</th>
+            <th>Description</th>
+            <th>Due Date</th>
+            <th>Completed</th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var task in Model.Tasks)
+        {
+            <tr>
+                <td>@task.Title</td>
+                <td>@task.Description</td>
+                <td>@task.DueDate.ToShortDateString()</td>
+                <td>@(task.IsCompleted ? "Yes" : "No")</td>
+                <td>
+                    <button class="btn btn-info btn-sm"
+                            onclick="openModal('@Url.Action("DetailsPartial", "Tasks", new { id = task.Id })')">
+                        View
+                    </button>
+                    <a asp-action="Edit" asp-route-id="@task.Id" class="btn btn-warning btn-sm">Edit</a>
+                    <button class="btn btn-danger btn-sm"
+                            onclick="openModal('@Url.Action("DeletePartial", "Tasks", new { id = task.Id })')">
+                        Delete
+                    </button>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+<nav>
+    <ul class="pagination">
+        @for (var i = 1; i <= Model.TotalPages; i++)
+        {
+            <li class="page-item @(i == Model.CurrentPage ? "active" : "")">
+                <a class="page-link" asp-action="Index" asp-route-page="@i">@i</a>
+            </li>
+        }
+    </ul>
+</nav>
+
+<!-- Контейнер за модалите -->
+<div id="modalContainer"></div>
+
+@section Styles {
+    <style>
+        /* Фон за модала */
+        .modal-backdrop-custom {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.5);
+            z-index: 1040;
+        }
+
+        /* Съдържание на модала */
+        .modal-content-custom {
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            max-width: 500px;
+            width: 90%;
+            margin: auto;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 1050;
+            box-shadow: 0 0 15px rgba(0,0,0,0.3);
+        }
+
+        /* Скриване на скрол при модал */
+        body.modal-open {
+            overflow: hidden;
+        }
+    </style>
+}
+
+@section Scripts {
+    <script>
+        function openModal(url) {
+            $.get(url, function (data) {
+                // Добавяме фон и съдържание
+                $('#modalContainer').html(
+                    '<div class="modal-backdrop-custom"></div>' +
+                    '<div class="modal-content-custom">' + data + '</div>'
+                );
+                // Забраняваме скрол на фон
+                $('body').addClass('modal-open');
+            });
+        }
+
+        function closeModal() {
+            $('#modalContainer').html('');
+            $('body').removeClass('modal-open');
+        }
+
+        // Затваряне при клик върху фона
+        $(document).on('click', '.modal-backdrop-custom', function () {
+            closeModal();
+        });
+    </script>
+}

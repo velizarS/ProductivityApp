@@ -1,0 +1,18 @@
+﻿@model ProductivityApp.Web.ViewModels.Tasks.TaskDetailViewModel
+
+<h4>@Model.Title</h4>
+
+@if (!string.IsNullOrEmpty(Model.Description))
+{
+    <p><strong>Description:</strong> @Model.Description</p>
+}
+
+<p><strong>Due Date:</strong> @Model.DueDate.ToShortDateString()</p>
+<p><strong>Completed:</strong> @(Model.IsCompleted ? "Yes" : "No")</p>
+
+@if (!string.IsNullOrEmpty(Model.CompletionNote))
+{
+    <p><strong>Completion Note:</strong> @Model.CompletionNote</p>
+}
+
+<button class="btn btn-secondary" onclick="closeModal()">Close</button>
