@@ -10,6 +10,6 @@ namespace ProductivityApp.Services.Interfaces
         Task CreateHabitAsync(Habit habit);
         Task UpdateHabitAsync(Habit habit);
         Task DeleteHabitAsync(Guid id);
-        Task MarkHabitCompletedAsync(Guid habitId, DateTime date);
+        Task<(bool isCompleted, int completedCount, int totalCount)> ToggleHabitAsync(Guid habitId, DateTime date);
     }
 }

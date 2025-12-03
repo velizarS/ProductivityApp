@@ -3,121 +3,288 @@
     ViewData["Title"] = "Dashboard";
 }
 
-<h2>Dashboard</h2>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+
 <hr />
 
-<div class="row">
-    <!-- Daily Entries -->
-    <div class="col-md-6 mb-4">
-        <div class="card shadow-sm">
-            <div class="card-header">
-                <h5>Recent Daily Entries</h5>
-            </div>
-            <div class="card-body">
-                @if (Model.DailyEntries.Any())
-                {
-                    <ul class="list-group">
-                        @foreach (var entry in Model.DailyEntries)
-                        {
-                            <li class="list-group-item d-flex justify-content-between align-items-center">
-                                @entry.Date.ToShortDateString()
-                                <a asp-controller="DailyEntry" asp-action="Detail" asp-route-id="@entry.Id" class="btn btn-sm btn-primary">View</a>
-                            </li>
-                        }
-                    </ul>
-                }
-                else
-                {
-                    <p>No daily entries yet.</p>
-                }
-            </div>
+<div class="dashboard-container container-fluid">
+  
+    <!-- TASKS CARD -->
+    <div class="card dashboard-card shadow-sm mb-3">
+        <div class="card-header d-flex justify-content-between align-items-center" data-bs-toggle="collapse" data-bs-target="#tasksCard">
+            <h5 class="mb-0">
+                <i class="fa-solid fa-list-check me-2"></i>Tasks
+            </h5>
+            <span class="badge bg-info">
+                @Model.Tasks.Count(t => t.CompletedAt.Date == DateTime.Now.Date && t.IsCompleted && !t.IsDeleted)
+                /
+                @Model.Tasks.Count(t => t.DueDate.Date <= DateTime.Now.Date && !t.IsCompleted && !t.IsDeleted)
+            </span>
         </div>
-    </div>
 
-    <!-- Tasks -->
-    <div class="col-md-6 mb-4">
-        <div class="card shadow-sm">
-            <div class="card-header">
-                <h5>Tasks Overview</h5>
-            </div>
-            <div class="card-body">
-                @if (Model.Tasks.Any())
-                {
-                    <ul class="list-group">
-                        @foreach (var task in Model.Tasks)
-                        {
-                            <li class="list-group-item d-flex justify-content-between align-items-center">
+        <div id="tasksCard" class="collapse card-body scrollable-card">
+            @if (Model.Tasks.Any(t => !t.IsCompleted && !t.IsDeleted))
+            {
+                <ul class="list-group">
+                    @foreach (var task in Model.Tasks
+                   .Where(t => !t.IsCompleted && !t.IsDeleted)
+                   .OrderBy(t => t.DueDate))
+                    {
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            <div class="text-truncate">
+                                <i class="fa-solid fa-clipboard-list me-2"></i>
                                 @task.Title
-                                <span class="badge @(task.IsCompleted ? "bg-success" : "bg-warning")">
-                                    @(task.IsCompleted ? "Done" : "Pending")
-                                </span>
-                            </li>
-                        }
-                    </ul>
-                }
-                else
-                {
-                    <p>No tasks assigned yet.</p>
-                }
-            </div>
-        </div>
-    </div>
-</div>
+                                @task.DueDate.ToString("dd.MM.yyyy")
+                            </div>
 
-<div class="row">
-    <!-- Habits -->
-    <div class="col-md-6 mb-4">
-        <div class="card shadow-sm">
-            <div class="card-header">
-                <h5>Habits Status</h5>
-            </div>
-            <div class="card-body">
-                @if (Model.Habits.Any())
-                {
-                    <ul class="list-group">
-                        @foreach (var habit in Model.Habits)
-                        {
-                            <li class="list-group-item d-flex justify-content-between align-items-center">
-                                @habit.Name
-                                <span class="badge @(habit.IsCompletedToday ? "bg-success" : "bg-secondary")">
-                                    @(habit.IsCompletedToday ? "Completed" : "Not done")
-                                </span>
-                            </li>
-                        }
-                    </ul>
-                }
-                else
-                {
-                    <p>No habits tracked yet.</p>
-                }
-            </div>
+                            <div class="d-flex align-items-center gap-1">
+                                <a asp-controller="Tasks" asp-action="Details" asp-route-id="@task.Id"
+                                   class="btn btn-sm btn-primary" title="Details">
+                                    <i class="fa-solid fa-circle-info"></i>
+                                </a>
+
+                                <form asp-controller="Tasks" asp-action="Edit" method="get" class="d-inline">
+                                    <input type="hidden" name="id" value="@task.Id" />
+                                    <button type="submit" class="btn btn-sm btn-warning" title="Edit / Postpone">
+                                        <i class="fa-solid fa-pen"></i>
+                                    </button>
+                                </form>
+
+                                <form asp-controller="Tasks" asp-action="Complete" method="post" class="d-inline">
+                                    <input type="hidden" name="id" value="@task.Id" />
+                                    <button type="submit" class="btn btn-sm btn-success" title="Complete">
+                                        <i class="fa-solid fa-check"></i>
+                                    </button>
+                                </form>
+
+                                <form asp-controller="Tasks" asp-action="Delete" method="post" class="d-inline">
+                                    <input type="hidden" name="id" value="@task.Id" />
+                                    <button type="submit" class="btn btn-sm btn-danger" title="Delete">
+                                        <i class="fa-solid fa-xmark"></i>
+                                    </button>
+                                </form>
+                            </div>
+                        </li>
+                    }
+                </ul>
+            }
+            else
+            {
+                <p>No tasks assigned yet.</p>
+            }
         </div>
     </div>
 
-    <!-- Journal Entries -->
-    <div class="col-md-6 mb-4">
-        <div class="card shadow-sm">
-            <div class="card-header">
-                <h5>Recent Journal Entries</h5>
-            </div>
-            <div class="card-body">
-                @if (Model.JournalEntries.Any())
-                {
-                    <ul class="list-group">
-                        @foreach (var journal in Model.JournalEntries)
-                        {
-                            <li class="list-group-item">
-                                <strong>@journal.Date.ToShortDateString()</strong> - @journal.Mood
-                                <p>@journal.Note</p>
-                            </li>
-                        }
-                    </ul>
-                }
-                else
-                {
-                    <p>No journal entries yet.</p>
-                }
-            </div>
+    <!-- HABITS CARD -->
+    <div class="card dashboard-card shadow-sm mb-3">
+        <div class="card-header d-flex justify-content-between align-items-center" data-bs-toggle="collapse" data-bs-target="#habitsCard">
+            <h5 class="mb-0"><i class="fa-solid fa-repeat me-2"></i>Habits</h5>
+            <span class="badge bg-success" id="habitsBadge">
+                @Model.Habits.Count(h => h.IsCompletedToday)/@Model.Habits.Count()
+            </span>
+        </div>
+        <div id="habitsCard" class="collapse card-body scrollable-card">
+            @if (Model.Habits.Any())
+            {
+                <ul class="list-group">
+                    @foreach (var habit in Model.Habits)
+                    {
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            <div><i class="fa-solid fa-leaf me-2"></i>@habit.Name</div>
+
+                            <button type="button"
+                                    class="btn btn-sm habit-toggle @(habit.IsCompletedToday ? "btn-success" : "btn-secondary")"
+                                    data-id="@habit.Id"
+                                    title="Toggle habit">
+                                @(habit.IsCompletedToday ? "✅" : "⬜")
+                            </button>
+                        </li>
+                    }
+                </ul>
+            }
+            else
+            {
+                <p>No habits tracked yet.</p>
+            }
         </div>
     </div>
+
+    <!-- JOURNAL CARD -->
+    <div class="card dashboard-card shadow-sm mb-3">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <div data-bs-toggle="collapse" data-bs-target="#journalCard" class="flex-grow-1">
+                <h5 class="mb-0"><i class="fa-solid fa-pen-to-square me-2"></i>Journal</h5>
+            </div>
+            <div class="d-flex align-items-center gap-2">
+                <span class="badge bg-info">@Model.JournalEntries.Count(j => j.Date.Date == DateTime.Now.Date)</span>
+                <i class="fa-solid fa-plus text-success add-journal-btn" title="Add new entry" role="button"></i>
+            </div>
+        </div>
+
+        <div id="journalCard" class="collapse card-body scrollable-card">
+            <div id="addJournalForm" class="mb-3" style="display:none;">
+                @await Html.PartialAsync("_JournalCreateForm", new ProductivityApp.Web.ViewModels.Journal.JournalEntryCreateViewModel())
+            </div>
+
+            @if (Model.JournalEntries.Any(j => j.Date.Date == DateTime.Now.Date))
+            {
+                <ul class="list-group">
+                    @foreach (var j in Model.JournalEntries.Where(j => j.Date.Date == DateTime.Now.Date))
+                    {
+                        <li class="list-group-item">
+                            <strong>@j.Date.ToShortDateString()</strong> — <span>@j.Mood</span>
+                            <p class="small text-muted mb-0">@j.Note</p>
+                        </li>
+                    }
+                </ul>
+            }
+            else
+            {
+                <p>No journal entries yet.</p>
+            }
+        </div>
+    </div>
+
+    <!-- HISTORY CARD -->
+    <div class="card dashboard-card shadow-sm mb-3">
+        <div class="card-header d-flex justify-content-between align-items-center" data-bs-toggle="collapse" data-bs-target="#historyCard">
+            <h5 class="mb-0"><i class="fa-solid fa-clock-rotate-left me-2"></i>History</h5>
+        </div>
+        <div id="historyCard" class="collapse card-body scrollable-card">
+            @if (Model.DailyEntries.Any())
+            {
+                <ul class="list-group">
+                    @foreach (var entry in Model.DailyEntries)
+                    {
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            @entry.Date.ToShortDateString()
+                            <i class="fa-solid fa-eye text-primary" title="View"></i>
+                        </li>
+                    }
+                </ul>
+            }
+            else
+            {
+                <p>No daily entries yet.</p>
+            }
+        </div>
+    </div>
+
 </div>
+
+<hr />
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const addBtn = document.querySelector(".add-journal-btn");
+        const form = document.getElementById("addJournalForm");
+        const cancelBtn = form ? form.querySelector("#cancelAddJournal") : null;
+
+        if (addBtn) {
+            addBtn.addEventListener("click", () => {
+                if (form) form.style.display = form.style.display === "none" ? "block" : "none";
+            });
+        }
+
+        if (cancelBtn) {
+            cancelBtn.addEventListener("click", () => {
+                form.style.display = "none";
+            });
+        }
+    });
+</script>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+
+        // COMPLETE TASK
+        document.querySelectorAll(".complete-task-form").forEach(form => {
+            form.addEventListener("submit", async (e) => {
+                e.preventDefault();
+
+                const id = form.dataset.id;
+                const token = form.querySelector("input[name='__RequestVerificationToken']").value;
+
+                const response = await fetch(`/Tasks/Complete`, {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/x-www-form-urlencoded",
+                        "X-Requested-With": "XMLHttpRequest"
+                    },
+                    body: `id=${id}&__RequestVerificationToken=${token}`
+                });
+
+                if (response.ok) {
+                    form.closest("li").classList.add("opacity-50");
+                    form.closest("li").querySelector(".btn-success").disabled = true;
+                }
+            });
+        });
+
+        // DELETE TASK
+        document.querySelectorAll(".delete-task-form").forEach(form => {
+            form.addEventListener("submit", async (e) => {
+                e.preventDefault();
+
+                if (!confirm("Are you sure you want to delete this task?")) return;
+
+                const id = form.dataset.id;
+                const token = form.querySelector("input[name='__RequestVerificationToken']").value;
+
+                const response = await fetch(`/Tasks/Delete/${id}`, {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/x-www-form-urlencoded",
+                        "X-Requested-With": "XMLHttpRequest"
+                    },
+                    body: `__RequestVerificationToken=${token}`
+                });
+
+                if (response.ok) {
+                    form.closest("li").remove();
+                }
+            });
+        });
+    });
+</script>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const badge = document.querySelector("#habitsBadge");
+
+        document.querySelectorAll(".habit-toggle").forEach(button => {
+            button.addEventListener("click", async function () {
+                const habitId = button.dataset.id;
+
+                try {
+                    const response = await fetch("/Habits/MarkComplete", {
+                        method: "POST",
+                        headers: {
+                            "Content-Type": "application/x-www-form-urlencoded",
+                            "X-Requested-With": "XMLHttpRequest"
+                        },
+                        body: `id=${habitId}`
+                    });
+
+                    if (!response.ok) throw new Error("Server error");
+
+                    const data = await response.json();
+
+                    // Toggle button style
+                    button.classList.toggle("btn-success", data.isCompleted);
+                    button.classList.toggle("btn-secondary", !data.isCompleted);
+                    button.textContent = data.isCompleted ? "✅" : "⬜";
+
+                    // Update badge
+                    if (badge) badge.textContent = `${data.completedCount}/${data.totalCount}`;
+                } catch (err) {
+                    console.error(err);
+                    alert("Error updating habit.");
+                }
+            });
+        });
+    });
+</script>
+
+
+

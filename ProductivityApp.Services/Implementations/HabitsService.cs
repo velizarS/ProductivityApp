@@ -69,24 +69,47 @@ namespace ProductivityApp.Services.Implementations
         }
 
 
-        public async Task MarkHabitCompletedAsync(Guid habitId, DateTime date)
+        public async Task<(bool isCompleted, int completedCount, int totalCount)> ToggleHabitAsync(Guid habitId, DateTime date)
         {
             var habit = await _unitOfWork.Habits.GetByIdAsync(habitId);
-            if (habit == null) throw new Exception("Habit not found.");
+            if (habit == null)
+                throw new Exception("Habit not found.");
 
-            var dailyEntry = await _dailyEntryService.GetOrCreateDailyEntryAsync(habit.UserId, date);
+            var dailyEntry = await _dailyEntryService.GetOrCreateDailyEntryAsync(habit.UserId, date.Date);
 
-            var habitCompletion = new HabitCompletion
+            var completion = await _unitOfWork.HabitCompletions.Query()
+                .FirstOrDefaultAsync(h => h.HabitId == habitId && h.DailyEntryId == dailyEntry.Id);
+
+            if (completion == null)
             {
-                Id = Guid.NewGuid(),
-                HabitId = habitId,
-                DailyEntryId = dailyEntry.Id,
-                Date = date,
-                IsCompleted = true
-            };
+                completion = new HabitCompletion
+                {
+                    Id = Guid.NewGuid(),
+                    HabitId = habitId,
+                    DailyEntryId = dailyEntry.Id,
+                    Date = date.Date,
+                    IsCompleted = true
+                };
+                await _unitOfWork.HabitCompletions.AddAsync(completion);
+            }
+            else
+            {
+                completion.IsCompleted = !completion.IsCompleted;
+                _unitOfWork.HabitCompletions.Update(completion);
+            }
 
-            await _unitOfWork.HabitCompletions.AddAsync(habitCompletion);
             await _unitOfWork.CompleteAsync();
+
+            var userId = habit.UserId;
+            var totalCount = await GetHabitsCountAsync(userId);
+            var completedCount = await _unitOfWork.HabitCompletions.Query()
+                .CountAsync(h => h.Habit.UserId == userId
+                              && h.Date.Date == date.Date
+                              && h.IsCompleted
+                              && !h.IsDeleted);
+
+            return (completion.IsCompleted, completedCount, totalCount);
         }
     }
 }
+

@@ -53,7 +53,7 @@ namespace ProductivityApp.Web.Controllers
             entry.UserId = GetUserId();
             await _journalService.CreateEntryAsync(entry);
 
-            return RedirectToAction(nameof(Index));
+            return RedirectToAction("Index", "Home");
         }
 
         public async Task<IActionResult> Edit(Guid id)

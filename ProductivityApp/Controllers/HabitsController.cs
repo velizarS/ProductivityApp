@@ -121,8 +121,22 @@ namespace ProductivityApp.Web.Controllers
         [HttpPost]
         public async Task<IActionResult> MarkComplete(Guid id)
         {
-            await _habitsService.MarkHabitCompletedAsync(id, DateTime.UtcNow);
-            return RedirectToAction(nameof(Index));
+            try
+            {
+                var result = await _habitsService.ToggleHabitAsync(id, DateTime.UtcNow);
+
+                return Ok(new
+                {
+                    result.isCompleted,
+                    result.completedCount,
+                    result.totalCount
+                });
+            }
+            catch
+            {
+                return BadRequest();
+            }
         }
+
     }
 }

@@ -13,8 +13,8 @@ namespace ProductivityApp.Web.Mappings
             CreateMap<JournalEntry, JournalEntryEditViewModel>();
             CreateMap<JournalEntryEditViewModel, JournalEntry>();
             CreateMap<JournalEntryCreateViewModel, JournalEntry>()
-                .ForMember(dest => dest.Id, opt => opt.Ignore()) // ID се генерира в сървиса
-                .ForMember(dest => dest.DailyEntryId, opt => opt.Ignore()) // се задава в сървиса
+                .ForMember(dest => dest.Id, opt => opt.Ignore()) 
+                .ForMember(dest => dest.DailyEntryId, opt => opt.Ignore())
                 .ForMember(dest => dest.IsDeleted, opt => opt.Ignore())
                 .ForMember(dest => dest.DeletedAt, opt => opt.Ignore());
         }

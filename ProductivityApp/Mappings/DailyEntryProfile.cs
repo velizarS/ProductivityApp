@@ -13,7 +13,6 @@ namespace ProductivityApp.Web.Mappings
     {
         public DailyEntryProfile()
         {
-            // DailyEntry -> DailyEntryDetailViewModel
             CreateMap<DailyEntry, DailyEntryDetailViewModel>()
                 .ForMember(dest => dest.Habits, opt => opt.MapFrom(src =>
                     src.HabitCompletions.Select(hc => new HabitListViewModel

@@ -29,7 +29,6 @@ namespace ProductivityApp.Web.Controllers
 
         private string GetUserId() => User.FindFirstValue(ClaimTypes.NameIdentifier);
 
-        // Index: списък с всички дневни записи
         public async Task<IActionResult> Index()
         {
             var userId = GetUserId();
@@ -40,7 +39,6 @@ namespace ProductivityApp.Web.Controllers
             return View(model);
         }
 
-        // Detail: детайли за конкретен дневен запис
         public async Task<IActionResult> Detail(Guid id)
         {
             var userId = GetUserId();
@@ -48,7 +46,6 @@ namespace ProductivityApp.Web.Controllers
 
             if (dailyEntry == null) return NotFound();
 
-            // Мапваме HabitCompletions безопасно
             var habits = dailyEntry.HabitCompletions
                 .Where(hc => hc.Habit != null)
                 .Select(hc => new HabitListViewModel

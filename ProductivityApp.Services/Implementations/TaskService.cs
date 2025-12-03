@@ -23,7 +23,7 @@ namespace ProductivityApp.Services.Implementations
         public async Task<IEnumerable<TaskM>> GetTasksAsync(string userId, int pageNumber = 1, int pageSize = 10)
         {
             var query = _unitOfWork.TaskMs.Query()
-                        .Where(t => t.UserId == userId)
+                        .Where(t => t.UserId == userId && !t.IsDeleted)
                         .Include(t => t.DailyEntry)
                         .OrderByDescending(t => t.DueDate);
 
@@ -67,12 +67,10 @@ namespace ProductivityApp.Services.Implementations
             await _unitOfWork.CompleteAsync();
         }
 
-
-
         public async Task<TaskM> CompleteTaskAsync(string userId, Guid taskId, string? completionNote = null)
         {
             var task = await _unitOfWork.TaskMs.Query()
-                        .FirstOrDefaultAsync(t => t.Id == taskId && t.UserId == userId);
+                        .FirstOrDefaultAsync(t => t.Id == taskId && t.UserId == userId && !t.IsDeleted);
 
             if (task == null)
                 throw new Exception("Task not found.");
@@ -95,7 +93,6 @@ namespace ProductivityApp.Services.Implementations
             return await _unitOfWork.TaskMs.Query()
                 .CountAsync(t => t.UserId == userId && !t.IsDeleted);
         }
-
 
         public async Task DeleteTaskAsync(Guid taskId)
         {

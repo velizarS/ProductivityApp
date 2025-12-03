@@ -9,5 +9,6 @@ namespace ProductivityApp.Services.Interfaces
         Task CreateEntryAsync(JournalEntry entry);
         Task UpdateEntryAsync(JournalEntry entry);
         Task DeleteEntryAsync(Guid id);
+
     }
 }

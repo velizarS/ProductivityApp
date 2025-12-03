@@ -46,7 +46,8 @@ namespace ProductivityApp.Web.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(TaskCreateViewModel model)
         {
-            if (!ModelState.IsValid) return View(model);
+            if (!ModelState.IsValid)
+                return View(model);
 
             var userId = GetUserId();
             await _taskService.AddTaskAsync(userId, model.Title, model.Description, model.DueDate);
@@ -57,7 +58,8 @@ namespace ProductivityApp.Web.Controllers
         public async Task<IActionResult> Edit(Guid id)
         {
             var task = await _taskService.GetTaskByIdAsync(id);
-            if (task == null) return NotFound();
+            if (task == null)
+                return NotFound();
 
             var model = _mapper.Map<TaskEditViewModel>(task);
             return View(model);
@@ -67,19 +69,27 @@ namespace ProductivityApp.Web.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(TaskEditViewModel model)
         {
-            if (!ModelState.IsValid) return View(model);
+            if (!ModelState.IsValid)
+                return View(model);
 
             var userId = GetUserId();
-            await _taskService.CompleteTaskAsync(userId, model.Id, model.CompletionNote);
-            var task = await _taskService.GetTaskByIdAsync(model.Id);
-            if (task == null) return NotFound();
+            var existingTask = await _taskService.GetTaskByIdAsync(model.Id);
+            if (existingTask == null)
+                return NotFound();
 
-            task.Title = model.Title;
-            task.Description = model.Description;
-            task.DueDate = model.DueDate;
-            task.IsCompleted = model.IsCompleted;
+            existingTask.Title = model.Title;
+            existingTask.Description = model.Description;
+            existingTask.DueDate = model.DueDate;
+            existingTask.IsCompleted = model.IsCompleted;
 
-            await _taskService.UpdateTaskAsync(task);
+            if (model.IsCompleted && !string.IsNullOrEmpty(model.CompletionNote))
+            {
+                await _taskService.CompleteTaskAsync(userId, model.Id, model.CompletionNote);
+            }
+            else
+            {
+                await _taskService.UpdateTaskAsync(existingTask);
+            }
 
             return RedirectToAction(nameof(Index));
         }
@@ -87,7 +97,8 @@ namespace ProductivityApp.Web.Controllers
         public async Task<IActionResult> DetailsPartial(Guid id)
         {
             var task = await _taskService.GetTaskByIdAsync(id);
-            if (task == null) return NotFound();
+            if (task == null)
+                return NotFound();
 
             var model = _mapper.Map<TaskDetailViewModel>(task);
             return PartialView("_TaskDetailsPartial", model);
@@ -96,7 +107,8 @@ namespace ProductivityApp.Web.Controllers
         public async Task<IActionResult> DeletePartial(Guid id)
         {
             var task = await _taskService.GetTaskByIdAsync(id);
-            if (task == null) return NotFound();
+            if (task == null)
+                return NotFound();
 
             var model = _mapper.Map<TaskDetailViewModel>(task);
             return PartialView("_TaskDeletePartial", model);
@@ -105,7 +117,8 @@ namespace ProductivityApp.Web.Controllers
         public async Task<IActionResult> Details(Guid id)
         {
             var task = await _taskService.GetTaskByIdAsync(id);
-            if (task == null) return NotFound();
+            if (task == null)
+                return NotFound();
 
             var model = _mapper.Map<TaskDetailViewModel>(task);
 
@@ -117,35 +130,33 @@ namespace ProductivityApp.Web.Controllers
             return View(model);
         }
 
-        public async Task<IActionResult> Delete(Guid id)
-        {
-            var task = await _taskService.GetTaskByIdAsync(id);
-            if (task == null) return NotFound();
-
-            var model = _mapper.Map<TaskDetailViewModel>(task);
-
-            if (Request.Headers["X-Requested-With"] == "XMLHttpRequest")
-            {
-                return PartialView("_TaskDeletePartial", model);
-            }
-
-            return View(model);
-        }
-
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(Guid id)
         {
             await _taskService.DeleteTaskAsync(id);
-            return RedirectToAction(nameof(Index));
+
+            if (Request.Headers["X-Requested-With"] == "XMLHttpRequest")
+            {
+                return Json(new { success = true });
+            }
+
+            return Redirect(Request.Headers["Referer"].ToString());
         }
 
         [HttpPost]
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> Complete(Guid id, string? note)
         {
             var userId = GetUserId();
             await _taskService.CompleteTaskAsync(userId, id, note);
-            return RedirectToAction(nameof(Index));
+
+            if (Request.Headers["X-Requested-With"] == "XMLHttpRequest")
+            {
+                return Json(new { success = true });
+            }
+
+            return Redirect(Request.Headers["Referer"].ToString());
         }
     }
 }
